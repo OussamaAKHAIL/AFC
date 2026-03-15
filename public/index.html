@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arduino Final Challenge - Inscription</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&family=Press+Start+2P&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="stars"></div>
+    <div class="decor decor-1">+</div>
+    <div class="decor decor-2">[]</div>
+
+    <!-- REGISTRATION VIEW -->
+    <div class="container" id="registrationView">
+        <div class="logo-container">
+            <img src="AC_F.png" alt="Arduino Club Final">
+        </div>
+        <h1 class="title">Arduino<br>Final Challenge</h1>
+        <div class="subtitle">INSCRIPTION EN LIGNE</div>
+
+        <div class="rule-box">
+            <div class="rule-title">⚠️ Règle de participation</div>
+            Cette compétition est réservée uniquement aux membres qui ont été présents aux trois dernières sessions
+            d’Arduino.<br><br>
+            <strong>Toute inscription ne respectant pas cette condition ne sera pas prise en compte. ⚠️</strong>
+        </div>
+
+        <form id="registrationForm">
+            <div class="form-group">
+                <label for="firstName">Prénom (First Name) *</label>
+                <input type="text" id="firstName" name="firstName" class="form-control" required
+                    placeholder="Votre prénom">
+            </div>
+            <div class="form-group">
+                <label for="lastName">Nom (Last Name) *</label>
+                <input type="text" id="lastName" name="lastName" class="form-control" required placeholder="Votre nom">
+            </div>
+            <button type="submit" class="btn-submit" id="submitBtn">Soumettre ma candidature</button>
+        </form>
+
+        <div id="successMsg" class="success-message" style="display: none;">
+            Merci ! Votre inscription a été enregistrée avec succès.
+        </div>
+    </div>
+
+    <!-- ADMIN LOGIN VIEW -->
+    <div class="container" id="loginView" style="display: none;">
+        <h1 class="title">Admin Access</h1>
+        <div class="subtitle">ROBOTECH STAFF ONLY</div>
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="adminPassword">Mot de passe / Password</label>
+                <input type="password" id="adminPassword" class="form-control" required placeholder="••••••••">
+            </div>
+            <div id="loginError" class="success-message"
+                style="display: none; background: rgba(179, 44, 44, 0.15); border-color: var(--alert-red); color: #FF6B6B;">
+                Mot de passe incorrect.
+            </div>
+            <button type="submit" class="btn-submit">Se connecter</button>
+            <button type="button" class="btn-submit"
+                style="background: transparent; border: 1px solid var(--primary); color: var(--text-main);"
+                onclick="showView('registrationView')">Retour</button>
+        </form>
+    </div>
+
+    <!-- ADMIN DASHBOARD VIEW -->
+    <div class="container" id="dashboardView" style="display: none; max-width: 800px;">
+        <h1 class="title">Dashboard</h1>
+        <div class="subtitle">LISTE DES INSCRIPTIONS</div>
+
+        <div id="loadingData" style="display: none; color: var(--primary); margin-bottom: 20px;">Chargement des
+            données...</div>
+
+        <div style="overflow-x: auto; margin-bottom: 20px;">
+            <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                <thead>
+                    <tr style="border-bottom: 2px solid var(--primary);">
+                        <th style="padding: 10px; color: var(--primary);">Date</th>
+                        <th style="padding: 10px; color: var(--primary);">Prénom</th>
+                        <th style="padding: 10px; color: var(--primary);">Nom</th>
+                    </tr>
+                </thead>
+                <tbody id="participantsList">
+                </tbody>
+            </table>
+        </div>
+
+        <button type="button" class="btn-submit" onclick="downloadExcel()">📥 Télécharger la liste (Excel/CSV)</button>
+        <button type="button" class="btn-submit"
+            style="background: transparent; border: 1px solid var(--primary); color: var(--text-main);"
+            onclick="showView('registrationView')">Déconnexion</button>
+    </div>
+
+    <!-- Hidden admin trigger button -->
+    <div style="position: absolute; bottom: 10px; right: 10px; opacity: 0.3; cursor: pointer; font-size: 0.8rem;"
+        onclick="showView('loginView')">
+        ⚙️ Admin
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
