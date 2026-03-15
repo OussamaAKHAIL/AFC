@@ -1,7 +1,7 @@
 // ==========================================
 // 1. REPLACE THIS URL WITH YOUR DEPLOYED GOOGLE SCRIPT URL!
 // ==========================================
-const GOOGLE_SCRIPT_URL = "https://script.google.com/a/macros/edu.uiz.ac.ma/s/AKfycbzuCBV1mQ5NvNVN696HEx-oKFdtRu4T2XUtruDyGCekIiHbzevRiKzE0Ycc6UegtZ--/exec";
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzuCBV1mQ5NvNVN696HEx-oKFdtRu4T2XUtruDyGCekIiHbzevRiKzE0Ycc6UegtZ--/exec";
 
 let participantsData = [];
 
@@ -90,19 +90,40 @@ function fetchParticipants() {
         return;
     }
 
-    // Fetch GET request from Google Apps Script
-    fetch(GOOGLE_SCRIPT_URL + "?action=getUsers")
-        .then(response => response.json())
-        .then(data => {
+    // Because Google blocks normal GET requests (CORS), we must use "JSONP"
+    // This creates an invisible script tag that loads the data as a Javascript function!
+    const script = document.createElement('script');
+
+    // We pass our action and tell Google to wrap the data in a function named "googleScriptCallback"
+    script.src = GOOGLE_SCRIPT_URL + "?action=getUsers&callback=googleScriptCallback";
+
+    // Setup a timeout just in case it fails silently (JSONP downside)
+    window.jsonpTimeout = setTimeout(() => {
+        if (loading.style.display === 'block') {
             loading.style.display = 'none';
-            participantsData = data.users || [];
-            renderParticipants();
-        })
-        .catch(error => {
-            console.error('Erreur:', error);
-            loading.style.display = 'none';
-            tbody.innerHTML = '<tr><td colspan="3" style="padding: 10px; text-align: center; color: #FF6B6B;">Erreur de chargement des données.</td></tr>';
-        });
+            tbody.innerHTML = '<tr><td colspan="3" style="padding: 10px; text-align: center; color: #FF6B6B;">Le chargement a pris trop de temps. Vérifiez votre connexion ou l\'URL du script.</td></tr>';
+        }
+    }, 10000);
+
+    document.body.appendChild(script);
+}
+
+// This function must be global so the JSONP script tag can find it!
+window.googleScriptCallback = function (data) {
+    clearTimeout(window.jsonpTimeout); // Stop the timeout error
+
+    const loading = document.getElementById('loadingData');
+    const tbody = document.getElementById('participantsList');
+
+    loading.style.display = 'none';
+
+    if (!data || !data.users) {
+        tbody.innerHTML = '<tr><td colspan="3" style="padding: 10px; text-align: center; color: #FF6B6B;">Données invalides reçues.</td></tr>';
+        return;
+    }
+
+    participantsData = data.users;
+    renderParticipants();
 }
 
 function renderParticipants() {
