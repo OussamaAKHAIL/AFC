@@ -1,6 +1,4 @@
 // ==========================================
-// 1. REPLACE THIS URL WITH YOUR DEPLOYED GOOGLE SCRIPT URL!
-// ==========================================
 const GOOGLE_SCRIPT_URL = "https://script.google.com/a/macros/edu.uiz.ac.ma/s/AKfycbzuCBV1mQ5NvNVN696HEx-oKFdtRu4T2XUtruDyGCekIiHbzevRiKzE0Ycc6UegtZ--/exec";
 
 let participantsData = [];
