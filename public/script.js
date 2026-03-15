@@ -1,4 +1,6 @@
 // ==========================================
+// 1. REPLACE THIS URL WITH YOUR DEPLOYED GOOGLE SCRIPT URL!
+// ==========================================
 const GOOGLE_SCRIPT_URL = "https://script.google.com/a/macros/edu.uiz.ac.ma/s/AKfycbzuCBV1mQ5NvNVN696HEx-oKFdtRu4T2XUtruDyGCekIiHbzevRiKzE0Ycc6UegtZ--/exec";
 
 let participantsData = [];
@@ -7,22 +9,22 @@ function showView(viewId) {
     document.getElementById('registrationView').style.display = 'none';
     document.getElementById('loginView').style.display = 'none';
     document.getElementById('dashboardView').style.display = 'none';
-    
+
     document.getElementById(viewId).style.display = 'block';
-    
+
     if (viewId === 'dashboardView') {
         fetchParticipants();
     }
 }
 
 // --- REGISTRATION LOGIC ---
-document.getElementById('registrationForm').addEventListener('submit', function(e) {
+document.getElementById('registrationForm').addEventListener('submit', function (e) {
     e.preventDefault();
-    
+
     const btn = document.getElementById('submitBtn');
     const firstName = document.getElementById('firstName').value;
     const lastName = document.getElementById('lastName').value;
-    
+
     btn.textContent = 'Envoi en cours...';
     btn.disabled = true;
 
@@ -42,30 +44,29 @@ document.getElementById('registrationForm').addEventListener('submit', function(
     // Send POST request to Google Apps Script
     fetch(GOOGLE_SCRIPT_URL, {
         method: 'POST',
+        // IMPORTANT: Google Scripts requires no-cors mode, otherwise it throws a CORS error
+        mode: 'no-cors',
         body: formData
     })
-    .then(response => response.json())
-    .then(data => {
-        if (data.result === 'success') {
+        .then(response => {
+            // With no-cors mode, we can't read the response. It will be an "opaque" object.
+            // We just have to assume it worked if the fetch didn't throw a network error.
             document.getElementById('registrationForm').style.display = 'none';
             document.getElementById('successMsg').style.display = 'block';
-        } else {
-            throw new Error('Server returned error');
-        }
-    })
-    .catch(error => {
-        console.error('Erreur:', error);
-        alert("Une erreur s'est produite lors de l'enregistrement. Veuillez réessayer.");
-        btn.textContent = 'Soumettre ma candidature';
-        btn.disabled = false;
-    });
+        })
+        .catch(error => {
+            console.error('Erreur:', error);
+            alert("Une erreur s'est produite lors de l'enregistrement. Veuillez réessayer.");
+            btn.textContent = 'Soumettre ma candidature';
+            btn.disabled = false;
+        });
 });
 
 // --- ADMIN LOGIN LOGIC ---
-document.getElementById('loginForm').addEventListener('submit', function(e) {
+document.getElementById('loginForm').addEventListener('submit', function (e) {
     e.preventDefault();
     const pass = document.getElementById('adminPassword').value;
-    
+
     if (pass === 'admin2026') {
         document.getElementById('adminPassword').value = '';
         document.getElementById('loginError').style.display = 'none';
@@ -79,7 +80,7 @@ document.getElementById('loginForm').addEventListener('submit', function(e) {
 function fetchParticipants() {
     const tbody = document.getElementById('participantsList');
     const loading = document.getElementById('loadingData');
-    
+
     tbody.innerHTML = '';
     loading.style.display = 'block';
 
@@ -91,23 +92,23 @@ function fetchParticipants() {
 
     // Fetch GET request from Google Apps Script
     fetch(GOOGLE_SCRIPT_URL + "?action=getUsers")
-    .then(response => response.json())
-    .then(data => {
-        loading.style.display = 'none';
-        participantsData = data.users || [];
-        renderParticipants();
-    })
-    .catch(error => {
-        console.error('Erreur:', error);
-        loading.style.display = 'none';
-        tbody.innerHTML = '<tr><td colspan="3" style="padding: 10px; text-align: center; color: #FF6B6B;">Erreur de chargement des données.</td></tr>';
-    });
+        .then(response => response.json())
+        .then(data => {
+            loading.style.display = 'none';
+            participantsData = data.users || [];
+            renderParticipants();
+        })
+        .catch(error => {
+            console.error('Erreur:', error);
+            loading.style.display = 'none';
+            tbody.innerHTML = '<tr><td colspan="3" style="padding: 10px; text-align: center; color: #FF6B6B;">Erreur de chargement des données.</td></tr>';
+        });
 }
 
 function renderParticipants() {
     const tbody = document.getElementById('participantsList');
     tbody.innerHTML = '';
-    
+
     if (participantsData.length === 0) {
         tbody.innerHTML = '<tr><td colspan="3" style="padding: 10px; text-align: center; color: #888;">Aucune inscription pour le moment.</td></tr>';
         return;
