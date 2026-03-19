@@ -166,3 +166,96 @@ function downloadExcel() {
     link.click();
     document.body.removeChild(link);
 }
+
+// --- SNEAKY ARDUINO LOGIC ---
+const sneaky = document.getElementById('sneakyArduino');
+let isDragging = false;
+let startX, startY, initialLeft, initialTop;
+let evasionTimer = null;
+
+function peekArduino() {
+    if (sneaky && !sneaky.classList.contains('peeking') && !isDragging) {
+        sneaky.classList.add('peeking');
+    }
+}
+
+function hideArduino() {
+    if (!sneaky || isDragging) return;
+    sneaky.classList.remove('peeking');
+    const nextPeek = Math.random() * 7000 + 3000;
+    setTimeout(peekArduino, nextPeek);
+}
+
+if (sneaky) {
+    // Evasion logic: runs away shortly after hover, giving a 300ms window to catch it!
+    sneaky.addEventListener('mouseenter', () => {
+        if (isDragging) return;
+        evasionTimer = setTimeout(() => {
+            if (!isDragging) hideArduino();
+        }, 30); // 300ms to catch it!
+    });
+
+    sneaky.addEventListener('mouseleave', () => {
+        clearTimeout(evasionTimer);
+    });
+
+    const startDrag = (e) => {
+        if (!sneaky.classList.contains('peeking')) return;
+        clearTimeout(evasionTimer);
+        isDragging = true;
+
+        const rect = sneaky.getBoundingClientRect();
+        sneaky.style.left = rect.left + 'px';
+        sneaky.style.top = rect.top + 'px';
+
+        sneaky.classList.remove('peeking');
+        sneaky.classList.add('grabbed');
+
+        let clientX = e.clientX || (e.touches && e.touches[0].clientX);
+        let clientY = e.clientY || (e.touches && e.touches[0].clientY);
+
+        startX = clientX;
+        startY = clientY;
+        initialLeft = rect.left;
+        initialTop = rect.top;
+
+        e.preventDefault(); // Prevent default image drag
+    };
+
+    sneaky.addEventListener('mousedown', startDrag);
+    sneaky.addEventListener('touchstart', startDrag, { passive: false });
+
+    const moveDrag = (e) => {
+        if (!isDragging) return;
+        let clientX = e.clientX || (e.touches && e.touches[0].clientX);
+        let clientY = e.clientY || (e.touches && e.touches[0].clientY);
+
+        const dx = clientX - startX;
+        const dy = clientY - startY;
+        sneaky.style.left = (initialLeft + dx) + 'px';
+        sneaky.style.top = (initialTop + dy) + 'px';
+        e.preventDefault();
+    };
+
+    document.addEventListener('mousemove', moveDrag);
+    document.addEventListener('touchmove', moveDrag, { passive: false });
+
+    const endDrag = () => {
+        if (!isDragging) return;
+        isDragging = false;
+        sneaky.classList.remove('grabbed');
+
+        // Remove inline tracking styles so it elegantly flies back to CSS defined origin
+        sneaky.style.left = '';
+        sneaky.style.top = '';
+
+        const nextPeek = Math.random() * 7000 + 3000;
+        setTimeout(peekArduino, nextPeek);
+    };
+
+    document.addEventListener('mouseup', endDrag);
+    document.addEventListener('touchend', endDrag);
+
+    // Initial peek delay
+    setTimeout(peekArduino, 2000);
+}
